@@ -138,6 +138,7 @@ class ModelTrainer:
       if self.scheduler and not self.batch_scheduler and not isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
         print("************Cyclic*************")
         self.scheduler.step()
+        print(self.scheduler.get_lr())
       pbar.write(f"Learning Rate = {lr:0.6f}")
     self.misclass.run()
     # save stats for later lookup
