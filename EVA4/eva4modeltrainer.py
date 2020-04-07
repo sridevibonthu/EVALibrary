@@ -136,6 +136,7 @@ class ModelTrainer:
       pbar.write(self.stats.get_epoch_desc())
       # need to ake it more readable and allow for other schedulers
       if self.scheduler and not self.batch_scheduler and not isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+        print("************Cyclic*************")
         self.scheduler.step()
       pbar.write(f"Learning Rate = {lr:0.6f}")
     self.misclass.run()
