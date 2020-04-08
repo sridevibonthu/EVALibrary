@@ -55,7 +55,7 @@ class Train:
       
       #lr =  if self.scheduler else (self.optimizer.lr_scheduler.get_last_lr()[0] if self.optimizer.lr_scheduler else self.optimizer.param_groups[0]['lr'])
       
-      self.stats.add_batch_train_stats(loss.item(), correct, len(data), 0)
+      self.stats.add_batch_train_stats(loss.item(), correct, len(data), lr)
       pbar.set_description(self.stats.get_latest_batch_desc())
       if self.scheduler:
         self.scheduler.step()
