@@ -46,9 +46,9 @@ class Train:
       # Update pbar-tqdm
       pred = y_pred.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
       correct = pred.eq(target.view_as(pred)).sum().item()
-      lr = 0
+      lr = 0.0
       if self.scheduler:
-        lr = self.scheduler.get_last_lr()
+        lr = self.scheduler.get_last_lr()[0]
       else:
         # not recalling why i used sekf.optimizer.lr_scheduler.get_last_lr[0]
         lr = self.optimizer.param_groups[0]['lr']
