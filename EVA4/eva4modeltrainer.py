@@ -48,13 +48,13 @@ class Train:
       correct = pred.eq(target.view_as(pred)).sum().item()
       lr = 0
       if self.scheduler:
-        lr = self.scheduler.get_last_lr()[0]
+        lr = self.scheduler.get_last_lr()
       else:
         # not recalling why i used sekf.optimizer.lr_scheduler.get_last_lr[0]
         lr = self.optimizer.param_groups[0]['lr']
       
       #lr =  if self.scheduler else (self.optimizer.lr_scheduler.get_last_lr()[0] if self.optimizer.lr_scheduler else self.optimizer.param_groups[0]['lr'])
-      print('lr for this batch:", lr)
+      #print('lr for this batch:", lr)
       self.stats.add_batch_train_stats(loss.item(), correct, len(data), lr)
       pbar.set_description(self.stats.get_latest_batch_desc())
       if self.scheduler:
@@ -136,7 +136,6 @@ class ModelTrainer:
       pbar.write(self.stats.get_epoch_desc())
       # need to ake it more readable and allow for other schedulers
       if self.scheduler and not self.batch_scheduler and not isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-        print("************Cyclic*************")
         self.scheduler.step()
         print(self.scheduler.get_lr())
       pbar.write(f"Learning Rate = {lr:0.6f}")
