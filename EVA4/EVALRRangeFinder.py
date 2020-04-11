@@ -1,5 +1,6 @@
 import torch.nn as nn
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
 import math
 
 class LRRangeFinder():
@@ -18,7 +19,9 @@ class LRRangeFinder():
   def findLR(self):
     iter = 0
     smoothing = 0.05
-    print("Epochs - ", self.epochs)
+    self.loss = []
+    self.lr = []
+    #print("Epochs - ", self.epochs)
 
     # Set up ptimizer and loss function for the experiment for our Resnet Model
     optimizer = torch.optim.SGD(self.model.parameters(), self.start_lr)
@@ -41,7 +44,7 @@ class LRRangeFinder():
         
         # Get outputs to calc loss
         outputs = self.model(inputs)
-        loss = criterion(outputs, labels)
+        loss = F.nll_loss(outputs, labels)
 
         # Backward pass
         loss.backward()
