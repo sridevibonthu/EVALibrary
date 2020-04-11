@@ -2,6 +2,9 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 import torch.nn.functional as F
 import math
+import torch
+from tqdm.notebook import trange, tqdm
+
 
 class LRRangeFinder():
   def __init__(self, model, epochs, start_lr, end_lr, dataloader, trainlen, batch_size):
@@ -30,9 +33,9 @@ class LRRangeFinder():
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
 
-    for i in range(self.epochs):
+    for i in trange(self.epochs):
       print("epoch {}".format(i))
-      for inputs, labels in self.dataloader:
+      for inputs, labels in tqdm(self.dataloader):
         
         # Send to device
         inputs = inputs.to(model.device)
@@ -44,7 +47,7 @@ class LRRangeFinder():
         
         # Get outputs to calc loss
         outputs = self.model(inputs)
-        loss = F.nll_loss(outputs, labels)
+        loss = criterion(outputs, labels)
 
         # Backward pass
         loss.backward()
