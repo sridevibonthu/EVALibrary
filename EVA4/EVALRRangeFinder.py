@@ -38,8 +38,8 @@ class LRRangeFinder():
       for inputs, labels in tqdm(self.dataloader):
         
         # Send to device
-        inputs = inputs.to(model.device)
-        labels = labels.to(model.device)
+        inputs = inputs.to(self.model.device)
+        labels = labels.to(self.model.device)
         
         # Training mode and zero gradients
         self.model.train()
