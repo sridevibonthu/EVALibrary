@@ -103,16 +103,16 @@ class ResNet(Net):
 
 
 def ResNet18(name="Resnet18"):
-    return ResNet(BasicBlock, [2,2,2,2], name=name)
+    return ResNet(BasicBlock, [2,2,2,2], num_classes=num_classes, name=name)
 
 def ResNet34(name="Resnet34"):
-    return ResNet(BasicBlock, [3,4,6,3], name=name)
+    return ResNet(BasicBlock, [3,4,6,3], num_classes=num_classes, name=name)
 
 def ResNet50(name="Resnet50"):
-    return ResNet(Bottleneck, [3,4,6,3], name=name)
+    return ResNet(Bottleneck, [3,4,6,3], num_classes=num_classes, name=name)
 
 def ResNet101(name="Resnet101"):
-    return ResNet(Bottleneck, [3,4,23,3], name=name)
+    return ResNet(Bottleneck, [3,4,23,3], num_classes=num_classes, name=name)
 
 def ResNet152():
     return ResNet(Bottleneck, [3,8,36,3])
