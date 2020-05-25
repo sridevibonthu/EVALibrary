@@ -1,10 +1,13 @@
 import torch
-from math import exp
 import torch.nn.functional as F
+from math import exp
+import numpy as np
+
 
 def gaussian(window_size, sigma):
     gauss = torch.Tensor([exp(-(x - window_size//2)**2/float(2*sigma**2)) for x in range(window_size)])
     return gauss/gauss.sum()
+
 
 def create_window(window_size, channel=1):
     _1D_window = gaussian(window_size, 1.5).unsqueeze(1)
@@ -12,8 +15,22 @@ def create_window(window_size, channel=1):
     window = _2D_window.expand(channel, 1, window_size, window_size).contiguous()
     return window
 
-def ssim(img1, img2, val_range, window_size=11, window=None, size_average=True, full=False):
-    L = val_range
+
+def ssim(img1, img2, window_size=11, window=None, size_average=True, full=False, val_range=None):
+    # Value range can be different from 255. Other common ranges are 1 (sigmoid) and 2 (tanh).
+    if val_range is None:
+        if torch.max(img1) > 128:
+            max_val = 255
+        else:
+            max_val = 1
+
+        if torch.min(img1) < -0.5:
+            min_val = -1
+        else:
+            min_val = 0
+        L = max_val - min_val
+    else:
+        L = val_range
 
     padd = 0
     (_, channel, height, width) = img1.size()
@@ -48,5 +65,34 @@ def ssim(img1, img2, val_range, window_size=11, window=None, size_average=True, 
 
     if full:
         return ret, cs
-
     return ret
+
+
+def msssim(img1, img2, window_size=11, size_average=True, val_range=None, normalize=False):
+    device = img1.device
+    weights = torch.FloatTensor([0.0448, 0.2856, 0.3001, 0.2363, 0.1333]).to(device)
+    levels = weights.size()[0]
+    mssim = []
+    mcs = []
+    for _ in range(levels):
+        sim, cs = ssim(img1, img2, window_size=window_size, size_average=size_average, full=True, val_range=val_range)
+        mssim.append(sim)
+        mcs.append(cs)
+
+        img1 = F.avg_pool2d(img1, (2, 2))
+        img2 = F.avg_pool2d(img2, (2, 2))
+
+    mssim = torch.stack(mssim)
+    mcs = torch.stack(mcs)
+
+    # Normalize (to avoid NaNs during training unstable models, not compliant with original definition)
+    if normalize:
+        mssim = (mssim + 1) / 2
+        mcs = (mcs + 1) / 2
+
+    pow1 = mcs ** weights
+    pow2 = mssim ** weights
+    # From Matlab implementation https://ece.uwaterloo.ca/~z70wang/research/iwssim/
+    output = torch.prod(pow1[:-1] * pow2[-1])
+    return output
+
