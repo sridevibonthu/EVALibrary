@@ -19,6 +19,7 @@ class Train:
     for data, target in pbar:
       # get samples
       data, target = data.to(self.model.device), target.to(self.model.device)
+      print(type(data), target)
 
       # Init
       self.optimizer.zero_grad()
@@ -28,6 +29,8 @@ class Train:
       # Predict
       y_pred = self.model(data)
       print(f'target - {target} - pred - {y_pred}')
+      
+      print("-------------------------------")
 
       # Calculate loss
       loss = F.nll_loss(y_pred, target)
