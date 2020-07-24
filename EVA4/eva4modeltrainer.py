@@ -27,6 +27,7 @@ class Train:
 
       # Predict
       y_pred = self.model(data)
+      print(f'target - {target} - pred - {y_pred})
 
       # Calculate loss
       loss = F.nll_loss(y_pred, target)
