@@ -18,8 +18,7 @@ class Train:
     pbar = tqdm_notebook(self.dataloader)
     for data, target in pbar:
       # get samples
-      data, target = data.to(self.model.device), target.to(self.model.device)
-      print(type(data), target)
+      data, target = data[0].to(self.model.device), target.to(self.model.device)
 
       # Init
       self.optimizer.zero_grad()
@@ -28,10 +27,7 @@ class Train:
 
       # Predict
       y_pred = self.model(data)
-      print(f'target - {target} - pred - {y_pred}')
-      
-      print("-------------------------------")
-
+      target=target.view(-1)
       # Calculate loss
       loss = F.nll_loss(y_pred, target)
 
@@ -71,29 +67,24 @@ class Test:
     self.stats = stats
     self.scheduler = scheduler
     self.loss=0.0
+    self.average_loss=0.0
 
   def run(self):
     self.model.eval()
     with torch.no_grad():
         for data, target in self.dataloader:
-            data, target = data.to(self.model.device), target.to(self.model.device)
+            data, target = data[0].to(self.model.device), target.to(self.model.device)
+            target=target.view(-1)
             output = self.model(data)
             self.loss = F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
-            
-            # check for Reduce LR on plateau
-            #https://pytorch.org/docs/stable/optim.html#torch.optim.lr_scheduler.ReduceLROnPlateau
-            '''if self.scheduler and isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-              print("hello yes i am ")
-              self.scheduler.step(loss)'''
-
+            self.average_loss+=self.loss
             pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
-            
             correct = pred.eq(target.view_as(pred)).sum().item()
             self.stats.add_batch_test_stats(self.loss, correct, len(data))
-        
+        self.average_loss/=len(self.dataloader)
         if self.scheduler and isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-              print("In scheduler step with loss of ", self.stats.get_validation_loss())
-              self.scheduler.step(self.stats.get_validation_loss())
+              #we are trying to step the scheduler using average loss
+              self.scheduler.step(self.average_loss)
 
 class Misclass:
   def __init__(self, model, dataloader, stats):
@@ -107,7 +98,8 @@ class Misclass:
         for data, target in self.dataloader:
           if len(self.stats.misclassified_images) == 25:
             return
-          data, target = data.to(self.model.device), target.to(self.model.device)
+          data, target = data[0].to(self.model.device), target.to(self.model.device)
+          target=target.view(-1)
           output = self.model(data)
           loss = F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
           pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
