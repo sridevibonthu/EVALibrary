@@ -4,7 +4,7 @@ from torchsummary import summary
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from eva4modeltrainer import ModelTrainer
+from eva4modeltrainer15 import ModelTrainer
 
 class Net(nn.Module):
     """
