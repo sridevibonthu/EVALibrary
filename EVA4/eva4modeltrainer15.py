@@ -9,7 +9,7 @@ from utils import saveresults, show
 import gc
 import numpy as np
 
-def compute_errors1(gt, pred):
+def compute_errors(gt, pred):
     print(np.min(gt),np.max(pred))
     theta = 0.00001
     gt = gt+theta
